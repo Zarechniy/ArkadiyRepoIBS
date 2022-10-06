@@ -44,7 +44,6 @@ public class RgsTest {
         WebElement dms = driver.findElement(By.xpath("//a[contains(@href, 'dobrovolnoe')]"));
         new WebDriverWait(driver, 3, 100)
                 .until(ExpectedConditions.visibilityOf(dms));
-
         checkFrame();
 
         //Переход по вкладке ДМС

@@ -37,34 +37,36 @@ public class ParametrizedRgsTest {
         driver = new ChromeDriver();
         driver.get("https://www.rgs.ru/");
         driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        driver.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(3, TimeUnit.SECONDS);
     }
 
     @Test
     public void test() {
 
         //Переход по вкладке Компаниям
-        closeFrame();
+        checkFrame();
         WebElement companiam = driver.findElement(By.xpath("//a[@href='/for-companies']"));
+        checkFrame();
         companiam.click();
-        closeFrame();
+        checkFrame();
         Assert.assertTrue("Переход по вкладке Компаниям не произошел",
                 driver.findElement(By.xpath("//span[@class='padding' and text()='Строительство']")).isDisplayed());
+        checkFrame();
 
         //Переход по вкладке Здоровье
         WebElement zdorovie = driver.findElement(By.xpath("//span[text()='Здоровье' and @class='padding']"));
-        closeFrame();
+        checkFrame();
         zdorovie.click();
-        closeFrame();
+        checkFrame();
         WebElement dms = driver.findElement(By.xpath("//a[contains(@href, 'dobrovolnoe')]"));
-        new WebDriverWait(driver, 3, 100)
+        new WebDriverWait(driver, 3, 300)
                 .until(ExpectedConditions.visibilityOf(dms));
-        closeFrame();
+        checkFrame();
 
         //Переход по вкладке ДМС
         dms.click();
-        closeFrame();
+        checkFrame();
         WebElement dmsSign = driver.findElement(By.xpath("//h1[contains(@class, 'word-breaking')]"));
         Assert.assertTrue("Не отображается хед текст", dmsSign.isDisplayed());
         Assert.assertTrue("Текст хедтекста не соответсвует",
@@ -99,7 +101,7 @@ public class ParametrizedRgsTest {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         executor.executeScript("arguments[0].click()", policiesKey);
 
-        new WebDriverWait(driver, 5, 300)
+        new WebDriverWait(driver, 3, 300)
                 .until(ExpectedConditions.attributeToBe(policiesKey, "value", "true"));
         WebElement submitButton = driver.findElement(By.xpath("//button[@type='submit']"));
         executor.executeScript("arguments[0].click()", submitButton);
@@ -111,8 +113,19 @@ public class ParametrizedRgsTest {
     }
 
     //Проверка наличия фрейма и его закрытие
-    public void closeFrame() {
+    public void checkFrame() {
+        try {
+            WebElement frame = driver.findElement(By.xpath("//iframe[@title='Flocktory widget']"));
+            new WebDriverWait(driver, 3, 500)
+                    .until(ExpectedConditions.visibilityOf(frame));
+            driver.switchTo().frame(frame);
+            new WebDriverWait(driver, 3)
+                    .until(ExpectedConditions
+                            .visibilityOf(driver.findElement(By.xpath("//div[@class='widget__close js-collapse-login']")))).click();
+        } catch (Exception ignore) {
+        } finally {
         driver.switchTo().defaultContent();
+        }
     }
 
     @After
